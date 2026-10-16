@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Student Management System - A cloud-connected full stack web application using Node.js, Express, and MongoDB Atlas.">
+  <title>Student Management System | MongoDB Atlas Cloud</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">🎓</div>
+        <div>
+          <div class="brand-text">EduCloud Admin</div>
+          <div class="brand-subtext">MongoDB Atlas System</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        <a class="nav-item active" id="navDashboard" href="#dashboard">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" id="navStudents" href="#students">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <span>Students Directory</span>
+        </a>
+        <a class="nav-item" id="navAddStudent" href="#add">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+          </svg>
+          <span>Add New Student</span>
+        </a>
+
+        <div class="nav-section-title">Cloud Infrastructure</div>
+        <a class="nav-item" id="navHealth" href="#health">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+          <span>System & Atlas Health</span>
+        </a>
+        <a class="nav-item" id="navArchitecture" href="#architecture">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+          <span>Project Architecture</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="cloud-badge-box">
+          <div class="cloud-badge-header">
+            <span class="atlas-tag">
+              <span id="sidebarPulse" class="pulse-dot"></span> MongoDB Atlas
+            </span>
+            <span id="sidebarDbState" style="color: #94a3b8; font-size: 0.7rem;">Checking...</span>
+          </div>
+          <div style="color: #64748b; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">
+            db: student_management_db
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+
+      <!-- Top Navbar -->
+      <header class="top-navbar">
+        <div class="navbar-left">
+          <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Toggle navigation menu">☰</button>
+          <h1 class="page-title">Student Management System</h1>
+        </div>
+
+        <div class="navbar-right">
+          <!-- Database Connectivity Pill -->
+          <div id="dbHealthPill" class="health-pill disconnected" title="Click to view database connection status">
+            <span id="healthPulse" class="pulse-dot" style="background-color: #ef4444; box-shadow: 0 0 8px #ef4444;"></span>
+            <span id="dbHealthText">Checking Atlas...</span>
+          </div>
+
+          <button id="btnOpenAddModal" class="btn btn-primary">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Add Student</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <main class="content-area">
+
+        <!-- College Project Banner -->
+        <div class="info-banner">
+          <div class="info-banner-text">
+            <h4>College Capstone: Setting Up MongoDB for Web Application with AWS Cloud</h4>
+            <p>
+              Full-stack demonstration connecting an Express REST API with MongoDB Atlas cloud database using Mongoose ODM.
+              Live database CRUD operations, field validation, and production cloud architecture.
+            </p>
+          </div>
+          <div class="info-banner-badge">
+            Cloud Ready • MongoDB Atlas
+          </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <section class="stats-grid" aria-label="Student Statistics">
+          <!-- Stat 1: Total Students -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-title">Total Students</span>
+              <div class="stat-icon icon-blue">👥</div>
+            </div>
+            <div id="statTotalStudents" class="stat-value">0</div>
+            <div class="stat-footer">
+              <span>Synced with MongoDB Atlas</span>
+            </div>
+          </div>
+
+          <!-- Stat 2: Active Departments -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-title">Departments</span>
+              <div class="stat-icon icon-cyan">🏛️</div>
+            </div>
+            <div id="statTotalDepartments" class="stat-value">0</div>
+            <div class="stat-footer">
+              <span>Enrolled across campus</span>
+            </div>
+          </div>
+
+          <!-- Stat 3: Study Years Covered -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-title">Academic Years</span>
+              <div class="stat-icon icon-indigo">📚</div>
+            </div>
+            <div id="statTotalYears" class="stat-value">Year 1 - 4</div>
+            <div class="stat-footer">
+              <span>Undergraduate & Postgraduate</span>
+            </div>
+          </div>
+
+          <!-- Stat 4: Cloud Status -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-title">Database Engine</span>
+              <div class="stat-icon icon-green">🍃</div>
+            </div>
+            <div id="statDbEngine" class="stat-value" style="font-size: 1.4rem;">MongoDB Atlas</div>
+            <div id="statDbHost" class="stat-footer">
+              <span>Cluster M0 / Serverless</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Students Directory & Data Table -->
+        <section class="data-section" id="studentsSection">
+          <!-- Toolbar -->
+          <div class="data-toolbar">
+            <div class="search-filter-group">
+              <!-- Search Bar -->
+              <div class="search-input-wrapper">
+                <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input
+                  type="text"
+                  id="searchInput"
+                  class="search-input"
+                  placeholder="Search by ID, name, or email..."
+                  aria-label="Search students"
+                >
+              </div>
+
+              <!-- Department Filter -->
+              <select id="departmentFilter" class="filter-select" aria-label="Filter by department">
+                <option value="All">All Departments</option>
+                <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
+                <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
+                <option value="Electrical & Electronics Engineering">Electrical & Electronics Engineering</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                <option value="Civil Engineering">Civil Engineering</option>
+                <option value="Biotechnology">Biotechnology</option>
+                <option value="Business Administration">Business Administration</option>
+                <option value="Other">Other</option>
+              </select>
+
+              <!-- Year Filter -->
+              <select id="yearFilter" class="filter-select" aria-label="Filter by year of study">
+                <option value="All">All Years</option>
+                <option value="1">Year 1</option>
+                <option value="2">Year 2</option>
+                <option value="3">Year 3</option>
+                <option value="4">Year 4</option>
+                <option value="5">Year 5</option>
+              </select>
+
+              <!-- Reset Filters -->
+              <button id="btnResetFilters" class="btn-reset" title="Reset all search filters">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Reset</span>
+              </button>
+            </div>
+
+            <!-- Refresh Button -->
+            <button id="btnRefreshData" class="btn btn-secondary" title="Reload from MongoDB Atlas">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          <!-- Table Wrapper -->
+          <div class="table-responsive">
+            <table class="data-table" id="studentsTable">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Student Name & Email</th>
+                  <th>Contact Number</th>
+                  <th>Department</th>
+                  <th>Course</th>
+                  <th>Year</th>
+                  <th>Admission Date</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody">
+                <!-- Rows injected dynamically via app.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State (Shown when no records exist) -->
+          <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📋</div>
+            <h3>No Student Records Found</h3>
+            <p id="emptyStateMsg">There are currently no students in the database matching your criteria.</p>
+            <button id="btnEmptyAdd" class="btn btn-primary">+ Add New Student</button>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loadingIndicator" class="empty-state" style="display: none;">
+            <div class="empty-state-icon" style="animation: spin 1s linear infinite;">⏳</div>
+            <h3>Connecting to MongoDB Atlas...</h3>
+            <p>Fetching records from cloud collection...</p>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="pagination-bar" id="paginationBar">
+            <div id="paginationInfo" class="pagination-info">Showing 0 of 0 students</div>
+            <div class="pagination-controls">
+              <button id="btnPrevPage" class="page-btn" disabled>Previous</button>
+              <span id="pageNumbers"></span>
+              <button id="btnNextPage" class="page-btn" disabled>Next</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       MODAL 1: ADD / EDIT STUDENT
+       ============================================================== -->
+  <div id="studentFormModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="formModalTitle">Add New Student</h3>
+        <button class="modal-close-btn" id="btnCloseFormModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="studentForm" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="editMongoId">
+          
+          <div class="form-grid">
+            <!-- Student ID -->
+            <div class="form-group">
+              <label for="inputStudentId">Student ID *</label>
+              <input
+                type="text"
+                id="inputStudentId"
+                class="form-control"
+                placeholder="e.g. STU101"
+                required
+                autocomplete="off"
+              >
+              <div class="form-help">Unique identifier (letters, numbers, hyphens)</div>
+            </div>
+
+            <!-- Full Name -->
+            <div class="form-group">
+              <label for="inputFullName">Full Name *</label>
+              <input
+                type="text"
+                id="inputFullName"
+                class="form-control"
+                placeholder="e.g. Alex Johnson"
+                required
+              >
+              <div class="form-help">First and last name</div>
+            </div>
+
+            <!-- Email Address -->
+            <div class="form-group">
+              <label for="inputEmail">Email Address *</label>
+              <input
+                type="email"
+                id="inputEmail"
+                class="form-control"
+                placeholder="e.g. alex@university.edu"
+                required
+              >
+              <div class="form-help">Must be a valid and unique email</div>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group">
+              <label for="inputPhone">Phone Number *</label>
+              <input
+                type="tel"
+                id="inputPhone"
+                class="form-control"
+                placeholder="e.g. +1 555-0199"
+                required
+              >
+              <div class="form-help">Contact mobile number</div>
+            </div>
+
+            <!-- Department -->
+            <div class="form-group">
+              <label for="inputDepartment">Department *</label>
+              <select id="inputDepartment" class="form-control" required>
+                <option value="">Select Department</option>
+                <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
+                <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
+                <option value="Electrical & Electronics Engineering">Electrical & Electronics Engineering</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                <option value="Civil Engineering">Civil Engineering</option>
+                <option value="Biotechnology">Biotechnology</option>
+                <option value="Business Administration">Business Administration</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Course -->
+            <div class="form-group">
+              <label for="inputCourse">Course Program *</label>
+              <input
+                type="text"
+                id="inputCourse"
+                class="form-control"
+                placeholder="e.g. B.Tech Computer Science"
+                required
+              >
+              <div class="form-help">Degree or academic program</div>
+            </div>
+
+            <!-- Year of Study -->
+            <div class="form-group">
+              <label for="inputYearOfStudy">Year of Study *</label>
+              <select id="inputYearOfStudy" class="form-control" required>
+                <option value="">Select Year</option>
+                <option value="1">Year 1 (Freshman)</option>
+                <option value="2">Year 2 (Sophomore)</option>
+                <option value="3">Year 3 (Junior)</option>
+                <option value="4">Year 4 (Senior)</option>
+                <option value="5">Year 5 (Graduate/Master's)</option>
+              </select>
+            </div>
+
+            <!-- Admission Date -->
+            <div class="form-group">
+              <label for="inputAdmissionDate">Date of Admission *</label>
+              <input
+                type="date"
+                id="inputAdmissionDate"
+                class="form-control"
+                required
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelForm">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitForm">
+            <span id="submitBtnSpinner" style="display:none;">⏳</span>
+            <span id="submitBtnText">Save to MongoDB Atlas</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       MODAL 2: STUDENT DETAILS VIEW
+       ============================================================== -->
+  <div id="studentDetailsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="detailsModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="detailsModalTitle">Student Profile Details</h3>
+        <button class="modal-close-btn" id="btnCloseDetailsModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-item-grid">
+          <div>
+            <div class="detail-label">Student ID</div>
+            <div class="detail-value"><span id="detailStudentId" class="student-id-badge"></span></div>
+          </div>
+          <div>
+            <div class="detail-label">MongoDB Document ID</div>
+            <div class="detail-value" style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #64748b;" id="detailMongoId"></div>
+          </div>
+          <div>
+            <div class="detail-label">Full Name</div>
+            <div class="detail-value" id="detailFullName"></div>
+          </div>
+          <div>
+            <div class="detail-label">Email Address</div>
+            <div class="detail-value" id="detailEmail"></div>
+          </div>
+          <div>
+            <div class="detail-label">Phone Number</div>
+            <div class="detail-value" id="detailPhone"></div>
+          </div>
+          <div>
+            <div class="detail-label">Department</div>
+            <div class="detail-value" id="detailDepartment"></div>
+          </div>
+          <div>
+            <div class="detail-label">Course / Degree</div>
+            <div class="detail-value" id="detailCourse"></div>
+          </div>
+          <div>
+            <div class="detail-label">Year of Study</div>
+            <div class="detail-value" id="detailYear"></div>
+          </div>
+          <div>
+            <div class="detail-label">Admission Date</div>
+            <div class="detail-value" id="detailAdmissionDate"></div>
+          </div>
+          <div>
+            <div class="detail-label">Record Created At</div>
+            <div class="detail-value" id="detailCreatedAt" style="font-size: 0.85rem; color: #64748b;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCloseDetailsBtn">Back to List</button>
+        <button type="button" class="btn btn-primary" id="btnEditFromDetails">Edit Record</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       MODAL 3: DELETE CONFIRMATION
+       ============================================================== -->
+  <div id="deleteConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 id="deleteModalTitle" style="color: var(--danger);">Confirm Document Deletion</h3>
+        <button class="modal-close-btn" id="btnCloseDeleteModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="margin-bottom: 0.85rem; font-size: 0.95rem;">
+          Are you sure you want to delete student <strong id="deleteStudentTargetName"></strong> (<code id="deleteStudentTargetId"></code>)?
+        </p>
+        <p style="color: #64748b; font-size: 0.825rem; background: #fef2f2; padding: 0.75rem; border-radius: 8px; border: 1px solid #fecaca;">
+          ⚠️ <strong>Database Alert:</strong> This action permanently deletes the student document from your MongoDB Atlas cloud database collection (<code>students</code>). This action cannot be undone.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCancelDelete">Cancel</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmDelete">
+          <span id="deleteSpinner" style="display:none;">⏳</span>
+          <span>Delete Student</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       MODAL 4: CLOUD ARCHITECTURE & VIVA INFO
+       ============================================================== -->
+  <div id="architectureModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="archModalTitle">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 id="archModalTitle">Cloud Architecture & College Presentation</h3>
+        <button class="modal-close-btn" id="btnCloseArchModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body" style="font-size: 0.875rem; line-height: 1.6;">
+        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Architecture Overview</h4>
+        <p style="margin-bottom: 1rem;">
+          This web application operates on a 3-tier cloud-connected architecture:
+        </p>
+        <ul style="margin-left: 1.25rem; margin-bottom: 1rem; color: #334155;">
+          <li><strong>Client Tier:</strong> HTML5, Vanilla CSS3, JavaScript SPA interacting with REST APIs.</li>
+          <li><strong>Application Tier:</strong> Node.js & Express.js REST API handling CRUD, Mongoose ODM schemas, and security. Can be hosted locally or deployed to <strong>AWS EC2</strong>.</li>
+          <li><strong>Database Tier:</strong> <strong>MongoDB Atlas</strong> cloud cluster hosting the <code>student_management_db</code> database and <code>students</code> collection.</li>
+        </ul>
+
+        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Database vs Relational DB (Viva Point)</h4>
+        <p style="margin-bottom: 1rem; color: #475569;">
+          Unlike Amazon RDS or MySQL which use tabular rows and rigid schemas, <strong>MongoDB Atlas</strong> is a document database storing flexible, JSON-like BSON documents. Mongoose enforces application-level validation, indexes, and type-safety.
+        </p>
+
+        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Current MongoDB Atlas Connection Status</h4>
+        <div id="archModalDbInfo" style="background: #f8fafc; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
+          Connecting...
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnCloseArchModalBtn">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

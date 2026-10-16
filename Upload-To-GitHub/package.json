@@ -1,0 +1,14 @@
+{
+  "name": "student-management-system",
+  "version": "1.0.0",
+  "description": "Student Management System - MongoDB Atlas Cloud Connected Web Application",
+  "scripts": {
+    "postinstall": "cd server && npm install",
+    "start": "cd server && npm start",
+    "dev": "cd server && npm run dev",
+    "seed": "cd server && npm run seed",
+    "test": "cd server && npm test"
+  },
+  "author": "College Student Project",
+  "license": "ISC"
+}
